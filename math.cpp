@@ -5,6 +5,7 @@
 #include <iostream>
 #include <limits>
 #include "math.h"
+#include "utils.h"
 
 using namespace utils;
 
@@ -24,6 +25,17 @@ namespace math {
         return (c0 + c1 + c2) / 3.0;
     }
 
+    bool is_convex(std::vector<osupp::Coordinate> points) {
+        if (points.size() < 3) return true;
+        bool negative = false;
+        for (int i = 0; i < points.size(); ++i) {
+            auto a = points[i], b = points[overflow(i + 1, points.size())], c = points[overflow(i + 2, points.size())];
+            bool negdot = (b - a).cross(c - b) < 0;
+            if (i == 0) negative = negdot;
+            else if (negdot != negative)return false;
+        }
+        return true;
+    }
 
     //https://github.com/robu3/delaunay/blob/master/Triangle.java
     osupp::Coordinate pcircumcenter(osupp::Coordinate a, osupp::Coordinate b, osupp::Coordinate c) {
@@ -48,5 +60,14 @@ namespace math {
         return {(b.y - a.y) / (b.x - a.x)};
     }
 
+    float polygram_angle(unsigned int n, unsigned int k) {
+        return 180 * k / n;
+    }
+
+    std::vector<int> polygram_alts(unsigned int n) {
+        std::vector<int> ret;
+        for(int k = n - 4; k > 0; k -= 2) ret.push_back(k);
+        return ret;
+    }
 }
 
