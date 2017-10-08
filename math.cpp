@@ -10,5 +10,14 @@ using namespace utils;
 
 namespace math {
 
+    float pangle(osupp::Coordinate a, osupp::Coordinate b, osupp::Coordinate c) {
+        auto diffa = (b - a);
+        auto diffb = (b - c);
+
+        auto dot = diffa.dot(diffb);
+        auto cross = diffa.cross(diffb);
+
+        return fabsf(atan2f(cross, dot));
+    }
 }
 
