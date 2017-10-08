@@ -52,6 +52,21 @@ protected:
     float width{};
 };
 
+class PolygramPatternBuilder : public CircumCentredPatternBuilder {
+public:
+
+protected:
+    bool step(std::shared_ptr<osupp::HitObject> obj) override;
+
+    bool validate() override;
+
+    Pattern *instantiate() override;
+
+    inline unsigned int min_objects() override {
+        return 5;
+    };
+};
+
 
 
 #endif //OSU_PATTERN_PATTERNS_H

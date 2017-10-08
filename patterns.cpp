@@ -27,6 +27,51 @@ Pattern *PatternBuilder::build(BeatmapIterator &iterator) {
 
     return instantiate();
 }
+
+bool PolygramPatternBuilder::step(std::shared_ptr<osupp::HitObject> obj) {
+    auto size = objects.size();
+    if (!CircumCentredPatternBuilder::step(obj)) return false;
+    if (size < 2) return true;
+
+    // Check wether sides have same width
+    auto w1 = obj->pos.distance(objects[objects.size() - 1]->pos);
+    auto w2 = objects[objects.size() - 1]->pos.distance(objects[objects.size() - 2]->pos);
+
+    if (fabsf(w1 - width) > width * 0.01f ||
+        fabsf(w2 - width) > width * 0.01f) {
+        return false;
+    }
+
+    objects.push_back(obj);
+    return true;
+}
+
+bool PolygramPatternBuilder::validate() {
+    bool valid = false;
+    for (int k : math::polygram_alts(static_cast<unsigned int>(objects.size()))) {
+        float target = math::polygram_angle(objects.size(), k);
+        valid = true;
+
+        for (auto i = 0; i < objects.size() - 2; i++) {
+            float angl = math::raddeg(math::pangle(objects[i]->pos, objects[i + 1]->pos, objects[i + 2]->pos));
+            if (fabsf(target - angl) > target * 0.2f) {
+                valid = false;
+                break;
+            }
+        }
+        if (valid) break;
+    }
+    return valid;
+}
+
+Pattern *PolygramPatternBuilder::instantiate() {
+    auto ret = new PolygramPattern();
+    ret->time = objects[0]->time;
+    ret->objects = objects;
+    ret->point_count = static_cast<unsigned int>(objects.size());
+    return reinterpret_cast<Pattern *>(ret);
+}
+
 bool CircumCentredPatternBuilder::step(std::shared_ptr<osupp::HitObject> obj) {
     if (obj == nullptr || obj->getType() != osupp::HitObject::HitObjectType::HitCircle) return false;
     for (const auto &oi : objects) if (oi->pos == obj->pos) return false;
