@@ -67,6 +67,21 @@ protected:
     };
 };
 
+class ConvexPatternBuilder : public CircumCentredPatternBuilder {
+public:
+
+protected:
+    bool step(std::shared_ptr<osupp::HitObject> obj) override;
+
+    bool validate() override;
+
+    Pattern *instantiate() override;
+
+    inline unsigned int min_objects() override {
+        return 4;
+    };
+};
+
 
 
 #endif //OSU_PATTERN_PATTERNS_H

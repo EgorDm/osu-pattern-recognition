@@ -3,6 +3,7 @@
 //
 
 #include "patterns.h"
+#include "math.h"
 
 
 bool PatternBuilder::step(std::shared_ptr<osupp::HitObject> obj) {
@@ -65,6 +66,33 @@ bool PolygramPatternBuilder::validate() {
 }
 
 Pattern *PolygramPatternBuilder::instantiate() {
+    auto ret = new PolygramPattern();
+    ret->time = objects[0]->time;
+    ret->objects = objects;
+    ret->point_count = static_cast<unsigned int>(objects.size());
+    return reinterpret_cast<Pattern *>(ret);
+}
+
+bool ConvexPatternBuilder::step(std::shared_ptr<osupp::HitObject> obj) {
+    auto size = objects.size();
+    if (!CircumCentredPatternBuilder::step(obj)) return false;
+    if (size < 2) return true;
+
+    for (const auto &oi : objects) {
+        if (oi->pos.distance(obj->pos) < width * 0.8) return false;
+    }
+
+    objects.push_back(obj);
+    return true;
+}
+
+bool ConvexPatternBuilder::validate() {
+    std::vector<osupp::Coordinate> points;
+    for (const auto &oi : objects) points.push_back(oi->pos);
+    return math::is_convex(points);
+}
+
+Pattern *ConvexPatternBuilder::instantiate() {
     auto ret = new PolygramPattern();
     ret->time = objects[0]->time;
     ret->objects = objects;
