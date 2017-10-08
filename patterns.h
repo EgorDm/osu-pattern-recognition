@@ -27,6 +27,19 @@ public:
 class PolygramPattern : public ConvexPattern {
 public:
 };
+
+class StreamPattern : public Pattern {
+public:
+    inline float get_bpm() {
+        return 60000 / timestep / 4;
+    }
+
+    float spacing = 0;
+    unsigned int timestep = 0;
+};
+
+
+
 class PatternBuilder { //TODO: explode && use modular checks(add classifiers)
 public:
     explicit PatternBuilder() = default;
@@ -80,6 +93,23 @@ protected:
     inline unsigned int min_objects() override {
         return 4;
     };
+};
+
+class StreamPatternBuilder : public PatternBuilder {
+protected:
+    bool step(std::shared_ptr<osupp::HitObject> obj) override;
+
+    Pattern *instantiate() override;
+
+    inline unsigned int min_objects() override {
+        return 4;
+    };
+
+    float spacing = 0;
+    float timestep = 0;
+
+    const float max_spacing = 60;
+    const float max_time = 300;
 };
 
 

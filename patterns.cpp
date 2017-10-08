@@ -119,3 +119,40 @@ bool CircumCentredPatternBuilder::step(std::shared_ptr<osupp::HitObject> obj) {
 
     return true;
 }
+
+bool StreamPatternBuilder::step(std::shared_ptr<osupp::HitObject> obj) {
+    if (obj == nullptr || obj->getType() != osupp::HitObject::HitObjectType::HitCircle) return false;
+    if (objects.empty()) {
+        objects.push_back(obj);
+        return true;
+    }
+
+    auto s = objects.back()->pos.distance(obj->pos);
+    auto t = obj->time - objects.back()->time;
+
+    if(objects.size() > 1) {
+        if (fabsf(spacing - s) > spacing * 0.2f) return false;
+        if (fabsf(timestep - t) > timestep * 0.1f) return false;
+
+        if (objects.size() >= 2) {
+            auto angle = math::raddeg(math::pangle(obj->pos, objects[objects.size() - 1]->pos, objects[objects.size() - 2]->pos));
+            if (angle <= 90) return false;
+        }
+    }
+
+    spacing = s;
+    timestep = t;
+    if(spacing > max_spacing || timestep > max_time) return false;
+
+    objects.push_back(obj);
+    return true;
+}
+
+Pattern *StreamPatternBuilder::instantiate() {
+    auto ret = new StreamPattern();
+    ret->time = objects[0]->time;
+    ret->objects = objects;
+    ret->timestep = static_cast<unsigned int>(timestep);
+    ret->spacing = spacing;
+    return ret;
+}
