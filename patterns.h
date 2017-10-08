@@ -18,6 +18,15 @@ public:
     unsigned long time{};
 };
 
+class ConvexPattern : public Pattern {
+public:
+    unsigned int point_count = 0;
+};
+
+
+class PolygramPattern : public ConvexPattern {
+public:
+};
 class PatternBuilder { //TODO: explode && use modular checks(add classifiers)
 public:
     explicit PatternBuilder() = default;
@@ -33,6 +42,14 @@ protected:
     virtual unsigned int min_objects() = 0;
 
     std::vector<std::shared_ptr<osupp::HitObject>> objects;
+};
+
+class CircumCentredPatternBuilder : public PatternBuilder {
+protected:
+    bool step(std::shared_ptr<osupp::HitObject> obj) override;
+
+    osupp::Coordinate centre;
+    float width{};
 };
 
 

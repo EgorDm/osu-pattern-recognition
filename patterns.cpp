@@ -27,3 +27,22 @@ Pattern *PatternBuilder::build(BeatmapIterator &iterator) {
 
     return instantiate();
 }
+bool CircumCentredPatternBuilder::step(std::shared_ptr<osupp::HitObject> obj) {
+    if (obj == nullptr || obj->getType() != osupp::HitObject::HitObjectType::HitCircle) return false;
+    for (const auto &oi : objects) if (oi->pos == obj->pos) return false;
+
+    if (objects.size() < 2) {
+        objects.push_back(obj);
+        return true;
+    }
+
+    auto tmp_centre = math::pcircumcenter(obj->pos, objects[objects.size() - 1]->pos, objects[objects.size() - 2]->pos);
+    if (tmp_centre.x != tmp_centre.x || tmp_centre.y != tmp_centre.y) return false;
+
+    if (objects.size() == 2) {
+        centre = tmp_centre;
+        width = obj->pos.distance(objects[objects.size() - 1]->pos);
+    } else if (centre.distance(tmp_centre) > width * 0.01f) return false;
+
+    return true;
+}
